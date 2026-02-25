@@ -1,0 +1,58 @@
+﻿<UserControl x:Class="SmartFillMonitor.Views.DashQueryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:local="clr-namespace:SmartFillMonitor.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- 引入 HandyControl 的核心资源字典（必须） -->
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+                <!-- 引入 HandyControl 的所有控件样式（必须） -->
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource AppBgDark}" CornerRadius="4" Padding="8" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="开始：" VerticalAlignment="Center" Foreground="White" Margin="0,0,5,0"/>
+                <hc:DateTimePicker SelectedDateTime="{Binding StartDate}" Width="120" VerticalAlignment="Center"/>
+
+                <TextBlock Text="结束：" VerticalAlignment="Center" Foreground="White" Margin="10,0,5,0"/>
+                <hc:DateTimePicker SelectedDateTime="{Binding EndDate}" Width="120" VerticalAlignment="Center"/>
+
+                <Button Content="查询" Command="{Binding QueryCommand}" Width="80" Margin="10,0,0,0" Foreground="White" Background="{StaticResource AppAccentColor}"/>
+                <Button Content="导出CSV" Command="{Binding ExportCommand}" Width="80" Margin="10,0,0,0" Foreground="White" Background="{StaticResource AppBgPanel}"/>
+            </StackPanel>
+        </Border>
+
+        <!--DataGrid控件默认背景颜色为白色，AutoGenerateColumns="True"表示自动生成列：根据属性，自动创建列（比如日志时间、等级、内容等）-->
+        <!--DataGrid是 WPF 的表格控件，核心是 “行 + 列展示结构化数据”，管数据展示-->
+        <!--HeadersVisibility="Column"表示只显示列标题（隐藏行标题），视觉更简洁-->
+        <!--GridLinesVisibility="Horizontal"表示只显示水平网格线（行分隔线），垂直网格线隐藏-->
+        <!--SelectedItem用来绑定 “用户在 DataGrid 里点击选中的那一行数据”，让 ViewModel 能拿到用户选的是哪一条记录。-->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Records}" AutoGenerateColumns="False" IsReadOnly="True" SelectedItem="{Binding SelectedRecord}">
+            <DataGrid.Columns>
+                <!--StringFormat=G 是 DateTime 的通用完整格式，显示「年 - 月 - 日 时：分: 秒」-->
+                <DataGridTextColumn Header="时间" Binding="{Binding Time,StringFormat=G}" Width="200"/>
+                <DataGridTextColumn Header="批次号" Binding="{Binding BatchNo}"/>
+                <DataGridTextColumn Header="实产" Binding="{Binding ActualCount}"/>
+                <DataGridTextColumn Header="目标" Binding="{Binding TargetCount}"/>
+                <DataGridTextColumn Header="设定温度" Binding="{Binding SettingTemp}"/>
+                <DataGridTextColumn Header="是否NG" Binding="{Binding IsNG}"/> 
+            </DataGrid.Columns>
+        </DataGrid>
+
+        
+    </Grid>
+</UserControl>

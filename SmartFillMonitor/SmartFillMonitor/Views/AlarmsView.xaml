@@ -1,0 +1,169 @@
+﻿<UserControl x:Class="SmartFillMonitor.Views.AlarmsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SmartFillMonitor.Views"
+             xmlns:converters="clr-namespace:SmartFillMonitor.Converters"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!--转换器需要先 “注册” 才能用-->
+            <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- 引入 HandyControl 的核心资源字典（必须） -->
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+                <!-- 引入 HandyControl 的所有控件样式（必须） -->
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!--Tabcontrol表示标签页的 “容器 / 框架”-->
+    <!--TabItem表示单个的 “标签页”-->
+    <TabControl Style="{StaticResource AppTabControlStyle}">
+        <TabItem Header="活动报警" Style="{StaticResource AppTabItemStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="12">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="当前活动报警" FontSize="20" FontWeight="Bold" Foreground="{StaticResource AppTextMain}"/>
+                        <Border Background="{StaticResource AppDanger}" CornerRadius="10" Padding="8,4" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ActiveAlarmCount}" FontSize="14" Foreground="White" FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="🔄刷新" Command="{Binding RefreshCommand}" HorizontalAlignment="Right" Width="90" Style="{StaticResource OutLineButton}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- 滚动视图容器：核心作用是当报警列表内容超出显示高度时，自动显示垂直滚动条，保证内容可滚动查看 -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <!-- 列表控件：核心作用是循环渲染ActiveAlarms集合中的每一条报警数据，集合有多少条数据就生成多少个报警卡片 -->
+                    <ItemsControl ItemsSource="{Binding ActiveAlarms}" Margin="12,0,0,12">
+                        <!-- 项模板：定义ItemsControl中每一条数据的显示模板 -->
+                        <ItemsControl.ItemTemplate>
+                            <!-- 数据模板：核心作用是定义单个报警卡片的完整样式和布局结构 -->
+                            <DataTemplate>
+                                <Border Padding="5" Margin="0,0,0,10">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#2D1111"/>
+                                            <Setter Property="BorderBrush" Value="{StaticResource AppBoderBrush}"/>
+                                            <Setter Property="BorderThickness" Value="4,0,0,0"/>
+                                        </Style>
+                                    </Border.Style>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <!--StackPanel没写Orientation，默认是Vertical（垂直）排列-->
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock FontWeight="Bold" FontSize="15">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="#FFCCCC"/>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                                <!-- 绑定报警数据的编码和标题，用冒号分隔 -->
+                                            <Run Text="{Binding Code}"/>:<Run Text="{Binding Title}"/>
+                                            </TextBlock>
+
+                                            <!--重点！由于，绑定的不是 AlarmsViewModel 的属性，而是 AlarmUiModel（Model）的属性 —— 这个属性写在 Model 层，所以不用在 ViewModel 里重复写。其他的没绑定在ViewModel的同理-->
+                                            <TextBlock Text="{Binding Description}" Margin="0,5,0,0" Foreground="#AAAAAA" FontSize="14"/>
+
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="20,0,0,0">
+                                            <TextBlock Text="{Binding TimeStr}" Foreground="#888888" FontSize="12" HorizontalAlignment="Right"/>
+                                            <!-- 核心难点1：跨层级绑定命令
+                                                        RelativeSource=AncestorType=UserControl → 向上找到页面根容器（UserControl）
+                                                        DataContext.AcknowledgeAlarmCommand → 拿到根容器ViewModel里的确认/复位命令
+                                                        原因：按钮在DataTemplate里（上下文是单条报警），命令在ViewModel里，需跨层级找 -->
+                                                        <!--跨层寻找逻辑图如下-->
+                                            <!--AlarmsView（UserControl）→ DataContext=AlarmsViewModel（有AcknowledgeAlarmCommand）
+                                            └─ ItemsControl → ItemsSource=ActiveAlarms（报警集合）
+                                                └─ DataTemplate（每个报警卡片）→ DataContext=单条AlarmUiModel（只有Code/Title等，没有命令）
+                                                    └─ 确认/复位按钮（想触发ViewModel里的命令）-->
+                                            <!-- 核心难点2：命令参数绑定
+                                                        {Binding} → 绑定当前DataContext（即单条AlarmUiModel报警数据）
+                                                        作用：把这条报警数据传给上面的命令，让ViewModel知道要处理哪一条报警 -->
+                                            <!--CommandParameter 是 WPF 按钮（或其他命令控件）的属性，作用是给要执行的命令传递 “额外参数”—— 让命令知道 “具体要操作什么数据 / 执行什么细节”。-->
+                                            <Button Content="确认/复位" Style="{StaticResource AppButtonStyle}" Command="{Binding DataContext.AcknowledgeAlarmCommand,RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="0,5,0,0" Background="#555555" Width="90"/>
+                                        </StackPanel> 
+
+                                    </Grid>
+                                </Border>
+
+
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- 核心绑定：把ActiveAlarmCount的值，通过ZeroToVisibilityConverter转换器，转成Visibility属性值 -->
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding ActiveAlarmCount,Converter={StaticResource ZeroToVisibilityConverter}}">
+                    <TextBlock Text="✔️" FontSize="48" Foreground="{StaticResource AppSuccess}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="当前无活动报警" FontSize="16" Foreground="{StaticResource AppTextMuted}" Margin="0,10,0,0"/>
+                </StackPanel>
+            </Grid>
+        </TabItem>
+        <TabItem Header="历史报警" Style="{StaticResource AppTabItemStyle}">
+            <Grid Background="{StaticResource AppBgDark}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="{StaticResource AppBgPanel}" BorderBrush="{StaticResource AppBoderBrush}" BorderThickness="1" Margin="12,12,12,8" Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="开始时间" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <hc:DateTimePicker SelectedDateTime="{Binding HistoryStartDate,UpdateSourceTrigger=PropertyChanged}" FontSize="12" Padding="4"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="至" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <hc:DateTimePicker SelectedDateTime="{Binding HistoryEndDate,UpdateSourceTrigger=PropertyChanged}" FontSize="12" Padding="4"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <Button Content="查询" Command="{Binding LoadHistroyAlarmsCommand}" Style="{StaticResource OutLineButton}" BorderBrush="Green" Width="80" Margin="10,0,8,0"/>
+
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="1" Background="{StaticResource AppBgPanel}" BorderBrush="{StaticResource AppBoderBrush}" BorderThickness="1" CornerRadius="4" Margin="12,0,12,12">
+                    <!-- Grid作为DataGrid的容器：提供基础布局（这里仅作为单层容器，无复杂布局） -->
+                    <Grid>
+                        <!-- 绑定ViewModel中的历史报警集合，表格会循环渲染每一条数据 -->
+                        <!--  AutoGenerateColumns="False"，关闭自动生成列：列由下面手动定义，避免自动生成多余列 -->
+                        <DataGrid ItemsSource="{Binding HistroyAlarms}" IsReadOnly="True" AutoGenerateColumns="False">
+                            <!-- 手动定义表格的列集合 -->
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Code" Binding="{Binding Code}"/>
+                                <DataGridTextColumn Header="Title" Binding="{Binding Title}"/>
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
+                                <DataGridTextColumn Header="TriggerTime" Binding="{Binding TimeStr}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </TabItem>
+    </TabControl>
+</UserControl>

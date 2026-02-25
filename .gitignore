@@ -1,0 +1,30 @@
+# Visual Studio 相关
+.vs/
+bin/
+obj/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# 编译产物
+*.dll
+*.exe
+*.pdb
+*.deps.json
+*.runtimeconfig.json
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+tmp/
+temp/
+
+# 压缩包
+*.zip
+*.7z
+
+# 个人配置
+code_prompt.md

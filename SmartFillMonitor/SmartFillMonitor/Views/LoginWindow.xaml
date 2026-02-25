@@ -1,0 +1,152 @@
+﻿<Window x:Class="SmartFillMonitor.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SmartFillMonitor.Views"
+        mc:Ignorable="d"
+        Title="SmartFill Monitor -Login" Height="450" Width="800" ResizeMode="NoResize" WindowStyle="None" AllowsTransparency="True" Background="Transparent" WindowStartupLocation="CenterScreen" MouseDown="Window_MouseDown">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="PrimaryBlueHover" Color="#0094F5"/>
+        <SolidColorBrush x:Key="PrimaryBlue" Color="#007ACC"/>
+
+        <SolidColorBrush x:Key="DarkBg" Color="#1E1E2E"/>
+        <SolidColorBrush x:Key="CardBg" Color="#252535"/>
+        <SolidColorBrush x:Key="TextDim" Color="#AAAAAA"/>
+        <SolidColorBrush x:Key="InputBg" Color="#2F2F41"/>
+
+        <Style TargetType="Button" x:Key="CloseBtnStyle">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="0,6,0,0">
+                            <Path Data="M1,1 L9,9 M9,1 L1,9" Stroke="White" StrokeThickness="1.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#E81123"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Border" x:Key="InputBorderStyle">
+            <Setter Property="Background" Value="{StaticResource InputBg}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Style>
+
+        <Style TargetType="Button" x:Key="MordenBtnStyle">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryBlueHover}"/>
+                            </Trigger>
+
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+     </Window.Resources>
+
+    <!--<DropShadowEffect>是 WPF 里给控件加 “投影 / 阴影” 的效果-->
+    <!--BlurRadius（模糊半径）ShadowDepth（阴影深度）-->
+        <Border Background="{StaticResource DarkBg}" CornerRadius="10" BorderThickness="1" BorderBrush="#333">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.4"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" CornerRadius="10,0,0,10">
+                <Border.Background>
+                    <!--<LinearGradientBrush>画刷类型 StartPoint="0,0"	渐变起点 EndPoint="0,1"	渐变终点
+                    <GradientStop>	渐变节点
+                    Offset 节点位置
+                    -->
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#004e92" Offset="0"/>
+                        <GradientStop Color="#000428" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <!--Uniform = 等比例缩放-->
+                    <Path Data="M10,20 L20,5 L30,20 L40,5 L50,20 L50,40 L10,40 Z" Fill="White" Opacity="0.8" Height="60" Stretch="Uniform"/>
+                    <TextBlock Text="SmartFill Monitor" FontSize="24" Foreground="White" Margin="0,20,0,5" HorizontalAlignment="Center"/>
+                    <TextBlock Text="智能灌装监控系统" FontSize="14" Foreground="#AACCEE" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Column="1" Background="{StaticResource CardBg}">
+                <Button Style="{StaticResource CloseBtnStyle}" Width="20" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Click="Cancel_Click"/>
+                <StackPanel VerticalAlignment="Center" Margin="40,0">
+                    <TextBlock Text="欢迎登录" FontSize="22" FontWeight="Bold" Foreground="White" Margin="0,0,0,30"/>
+                    
+                    <TextBlock Text="用户名" FontSize="14" Foreground="{StaticResource TextDim}" Margin="0,0,0,5"/>
+                    <Border Style="{StaticResource InputBorderStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <!--Stroke：图形的 “边框颜色”-->
+                            <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"
+                                  Stroke="#AAAAAA" StrokeThickness="2" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{StaticResource TextDim}" Stretch="Uniform" Height="16"/>
+                            <!--DisplayMemberPath = 下拉框的 “显示文字” SelectedValuePath = 选中后程序能拿到的 “实际值”；-->
+                            <ComboBox x:Name="UserNameCombo" Grid.Column="1" Background="Transparent" VerticalContentAlignment="Center" Height="38" BorderThickness="0" Foreground="Black" FontSize="14" DisplayMemberPath="UserName" SelectedValuePath="UserName"/>
+                            
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="密码" FontSize="14" Foreground="{StaticResource TextDim}" Margin="2,0,0,5"/>
+                    <Border Style="{StaticResource InputBorderStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Path Data="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"
+              Stroke="#AAAAAA" StrokeThickness="2" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{StaticResource TextDim}" Stretch="Uniform" Height="16"/>
+                            <PasswordBox x:Name="PasswordBox" Grid.Column="1" Background="Transparent" VerticalContentAlignment="Center" BorderThickness="0" Foreground="White" FontSize="14" CaretBrush="White"/>
+
+                        </Grid>
+                    </Border>
+
+                    <!-- IsDefault="True" 这个属性就是Enter键登录的关键 -->
+                    <Button Content="立即登录" Style="{StaticResource MordenBtnStyle}" Background="{StaticResource PrimaryBlue}" Height="45" Margin="0,15,0,0" Click="Login_Click"  IsDefault="True" Cursor="Hand">
+                        <Button.Effect>
+                            <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.3" Color="Black"/>
+                        </Button.Effect>
+                    </Button>
+
+                    <Button Content="退出系统" Click="Cancel_Click" Margin="0,15,0,0" Foreground="{StaticResource TextDim}" Background="Transparent" BorderThickness="0" Cursor="Hand"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

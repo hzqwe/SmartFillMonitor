@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="SmartFillMonitor.UserControls.StatusIndicator"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SmartFillMonitor.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Height="20">
+    <!-- 用户控件的资源字典：存放可复用的转换器、样式等 -->
+    <UserControl.Resources>
+        <!-- 布尔值转可见性转换器：true=显示，false=隐藏 -->
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+    <!-- 水平排列的容器：将指示灯和文字并排显示 -->
+    <StackPanel Orientation="Horizontal">
+        <!-- 绑定的属性名：就是你后台定义的IsOnline依赖属性 -->
+        <!-- 绑定来源：找当前UserControl（也就是这个StatusIndicator控件）上的IsOnline属性 -->
+        <!-- 绑定当前控件的IsOnline属性，通过转换器控制指示灯显示/隐藏 -->
+
+        <!--重点！！！  RelativeSource={RelativeSource AncestorType=UserControl} → 翻译成人话：-->
+<!--“不要去当前控件的 DataContext（通常是 ViewModel）里找这个属性，去当前 XAML 对应的那个 UserControl 控件实例本身（也就是 xaml.cs 里的类）里找！”-->
+        <Ellipse Fill="Orange" Margin="0,0,8,0" Width="10" Height="10" 
+                 Visibility="{Binding IsOnline,RelativeSource={RelativeSource AncestorType=UserControl},Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!-- 指示灯的样式：包含触发动画的逻辑 -->
+            <Ellipse.Style>
+                <Style TargetType="Ellipse">
+                    <Style.Triggers>
+                        <!-- 数据触发器：当IsWarning为true时触发动画 -->
+                        <!-- 绑定的属性名：后台定义的IsWarning依赖属性 -->
+                        <!-- 绑定来源：找当前UserControl上的IsWarning属性 -->
+                        <DataTrigger Binding="{Binding IsWarning,RelativeSource={RelativeSource AncestorType=UserControl}}" Value="true">
+                            <!-- 触发器触发时执行的动作：开始动画 -->
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <!-- 无限循环的动画容器 -->
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <!-- 透明度动画：1秒内从1.0（不透明）到0.3（半透明），然后反向播放（闪烁效果） -->
+                                        <!--AutoReverse	True	自动反向：动画执行完（从 1.0→0.3）后，会自动倒着执行一遍（从 0.3→1.0）。-->
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.3" Duration="0:0:1" AutoReverse="True"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Ellipse.Style>
+        </Ellipse>
+
+        <!-- 状态文本显示：绑定StatusText属性，使用AppTextMuted背景色，字体14px，垂直居中 -->
+        <!-- 绑定来源：找当前UserControl上的StatusText属性 -->
+        <TextBlock Text="{Binding StatusText,RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{StaticResource  AppTextMuted}" FontSize="14" VerticalAlignment="Center"/>
+    </StackPanel>
+
+</UserControl>

@@ -1,0 +1,269 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:vm="clr-namespace:SmartFillMonitor.ViewModels"
+                    xmlns:views="clr-namespace:SmartFillMonitor.Views"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--主应用深色背景-->
+    <SolidColorBrush x:Key="AppBgDark" Color="#1E1E1E"/>
+
+    <!--面板、内容背景-->
+    <SolidColorBrush x:Key="AppBgPanel" Color="#252526"/>
+
+    <!--Tab、Header背景-->
+    <SolidColorBrush x:Key="AppBgHeader" Color="#2D2D30"/>
+
+    <!--主按钮、选中导航、边框背景-->
+    <SolidColorBrush x:Key="AppAccentColor" Color="#007ACC"/>
+
+    <!--主要文字颜色：正文、标题背景-->
+    <SolidColorBrush x:Key="AppTextMain" Color="#FFFFFF"/>
+
+    <!--次要文字背景颜色、占位文本背景-->
+    <SolidColorBrush x:Key="AppTextMuted" Color="#AAAAAA"/>
+
+    <!--成功：显示成功、正常状态背景-->
+    <SolidColorBrush x:Key="AppSuccess" Color="#4CAF50"/>
+
+    <!--信息颜色：用于信息提示背景-->
+    <SolidColorBrush x:Key="AppInfo" Color="#4CAF50"/>
+
+    <!--警告颜色背景-->
+    <SolidColorBrush x:Key="AppWarning" Color="#FF9800"/>
+
+    <!--错误、危险颜色背景-->
+    <SolidColorBrush x:Key="AppDanger" Color="#D50000"/>
+
+    <!--通用边框颜色：控件边框、Card背景-->
+    <SolidColorBrush x:Key="AppBoderBrush" Color="#3E3E42"/>
+
+    <!-- 
+    定义等宽字体资源，命名为 FontMono
+    等宽字体（Monospace Font）：每个字符的宽度完全相同，区别于普通的比例字体（如微软雅黑，不同字符宽度不同）
+    字体优先级：优先使用 Consolas（Windows 系统默认等宽字体，清晰易读），若系统没有则降级使用 Courier New
+    适用场景：显示数字、代码、数据统计等需要对齐的内容（如仪表盘的产量、温度、运行时间等数值）
+-->
+    <FontFamily x:Key="FontMono">Consolas,Courier New</FontFamily>
+      
+    <DataTemplate DataType="{x:Type vm:DashBoardViewModel}">
+        <views:DashBoardView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:DashQueryViewModel}">
+        <views:DashQueryView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:LogsViewModel}">
+        <views:LogsView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:AlarmsViewModel}">
+        <views:AlarmsView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:SettingViewModel}">
+        <views:SettingView/>
+    </DataTemplate>
+
+    <!--重点！普通Setter：修改控件的内置属性，不改变控件的视觉结构-->
+    <!--Template：重写控件的视觉结构，相当于 “重新画控件的样子”-->
+
+    <!--Navgation item Style-->
+    <Style x:Key="NavItemStyle" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource AppTextMuted}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="3,0,0,0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Padding" Value="20,15"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#3E3E42"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="Background" Value="#37373D"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource AppAccentColor}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <!--BoardStyle-->
+    <Style x:Key="CardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource AppBgDark}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource AppBoderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="15"/>
+    </Style>
+    
+    <!--ComboBox Style-->
+    <Style TargetType="ComboBox">
+        <Setter Property="Background" Value="Black"/>
+        <Setter Property="BorderBrush" Value="Black"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="8"/>
+    </Style>
+
+    <!--Button Style-->
+    <Style TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource AppAccentColor}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="BorderThickness"  Value="0"/>
+        <Setter Property="Cursor"  Value="Hand"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Margin}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="0.9"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--OutLineButton Style-->
+    <Style TargetType="Button" x:Key="OutLineButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource AppTextMain}"/> 
+        <Setter Property="BorderBrush" Value="{StaticResource AppBoderBrush}"/>
+        <Setter Property="BorderThickness"  Value="1"/>
+        <Setter Property="Cursor"  Value="Hand"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Margin}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#3E3E42"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--AppButton Style-->
+    <Style TargetType="Button" x:Key="AppButtonStyle">
+        <Setter Property="Background" Value="{StaticResource AppAccentColor}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="BorderThickness"  Value="0"/>
+        <Setter Property="Cursor"  Value="Hand"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Margin}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="0.9"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--TabItem Style （单个选项卡项）-->
+    <Style TargetType="TabItem" x:Key="AppTabItemStyle">
+        <Setter Property="Foreground" Value="{StaticResource AppTextMuted}"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="Margin" Value="4,0,4,0"/>
+        <Setter Property="MinWidth" Value="64"/>
+        <!-- 自定义模板：重写TabItem的视觉结构 -->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Grid>
+                        <Border x:Name="Bd" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" CornerRadius="6,6,0,0" Padding="{TemplateBinding Padding}">
+                            <!--RecognizesAccessKey="True" 功能：支持快捷键（访问键） -->
+                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                        </Border>
+                    </Grid>
+                    <!--Border的Background：是 Border内部填充区域的颜色-->
+                    <!--BorderBrush：是 Border边框线条的颜色-->
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource AppBgHeader}"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AppAccentColor}"/>
+                            <Setter Property="Foreground" Value="{StaticResource AppTextMain}"/> 
+                        </Trigger>
+
+                        <!--禁用状态触发器 false-->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="#777777"/>
+                        </Trigger>
+
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#2E2E2E"/>
+                            <Setter Property="Foreground" Value="{StaticResource AppTextMain}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--TabControl Style （选项卡容器）-->
+    <Style TargetType="TabControl" x:Key="AppTabControlStyle">
+        <Setter Property="Background" Value="{StaticResource AppBgPanel}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource AppBoderBrush}"/>
+        <Setter Property="Padding" Value="6"/>
+        <Setter Property="ItemContainerStyle" Value="{StaticResource AppTabItemStyle}"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabControl">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <!-- 第一行：选项卡标题栏（放所有TabItem的Header） -->
+                        <!--- TabPanel的IsItemsHost="True"：告诉WPF“这里要自动加载所有TabItem的标题”（比如“Log”“LogAnalyze”）-->
+                        <Border Grid.Row="0" Background="Transparent" Padding="6,6,6,0">
+                            <TabPanel x:Name="HeaderPanel" IsItemsHost="True" Margin="0,0,0,0"/>
+                        </Border>
+
+                        <!-- 第二行：选项卡内容区（放当前选中的TabItem的内容） -->
+                        <Border Grid.Row="1" Background="{StaticResource AppBgPanel}" BorderBrush="{StaticResource AppBoderBrush}" BorderThickness="1" CornerRadius="0,6,6,6" Margin="0,8,0,0" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" Margin="8"/>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+</ResourceDictionary>

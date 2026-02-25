@@ -1,0 +1,304 @@
+﻿<UserControl x:Class="SmartFillMonitor.Views.DashBoardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SmartFillMonitor.Views"
+             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="800">
+    <!-- 
+        重难点：布尔值转可见性转换器（系统内置的转换器）
+        作用：把 true/false 这种布尔值，转换成 WPF 控件需要的 Visibility 枚举值（Visible/Collapsed）
+        用途：用于通过绑定的布尔值，控制控件“显示/隐藏”
+        转换规则：
+        - true → Visible（控件显示）
+        - false → Collapsed（控件隐藏，且不占布局空间）
+        示例：代码中灌装杆 <Rectangle> 的 Visibility 绑定了 ValueOpen，通过这个转换器实现“阀门打开时显示灌装杆，关闭时隐藏”
+    -->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,20,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <!--Card1:产量-->
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,10,0">
+                <!--StackPanel 的作用是排列多个子元素（垂直 / 水平），只有 1 个元素时，套它完全没用；-->
+                <StackPanel>
+                    <TextBlock Text="当前产量（PCS）" Foreground="{StaticResource AppTextMuted}" FontSize="14" Margin="0,0,0,10"/>
+                    <!-- 
+                        重点拆解：Text="{Binding ActualCount,StringFormat='{}{0:N0}'}"
+                        1. {Binding ActualCount}：绑定ViewModel里的ActualCount属性（当前产量数值）
+                        2. StringFormat='{}{0:N0}'：对绑定的数值做格式化处理
+                           - {}：WPF的转义符，用来包裹格式化字符串，避免和绑定语法冲突
+                           - {0}：表示要格式化的是绑定的第一个值（这里就是ActualCount）
+                           - :N0：数值格式化规则，具体含义：
+                             - N：Number（数字）格式，会自动加千分位分隔符
+                             - 0：小数位数为0（只显示整数，不显示小数点后内容）
+                           举例：
+                             - 若ActualCount=1234 → 格式化后显示 1,234
+                             - 若ActualCount=1234567 → 格式化后显示 1,234,567
+                    -->
+                    <StackPanel>
+                        <TextBlock Text="{Binding ActualCount,StringFormat='{}{0:N0}'}" Foreground="{StaticResource AppAccentColor}" FontSize="32" FontWeight="Bold" FontFamily="{StaticResource FontMono}"/>
+                    </StackPanel>
+                    <!--<Run>就是让你在同一个文本框里，既写死的提示文字，又插活的动态数据，实现 “固定文案 + 实时数值” 的组合显示。-->
+                        <TextBlock Foreground="{StaticResource AppSuccess}" FontSize="12" Margin="0,5,0,0">
+                        <Run Text="↑ 目标达成率"/>
+                        <Run Text="{Binding ActualCount}"/>
+                        <Run Text="/"/>
+                        <Run Text="{Binding TargetCount}"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+            <!--Card2:温度模块-->
+            <Border Grid.Column="1" Style="{StaticResource CardStyle}" Margin="0,0,10,0">
+                <StackPanel>
+                    <TextBlock Text="实时温度" Foreground="{StaticResource AppTextMuted}" FontSize="14" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding CurrentTemp}" Foreground="{StaticResource AppAccentColor}" FontSize="32" Margin="0,0,0,10" FontWeight="Bold" FontFamily="{StaticResource FontMono}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <!--写两个TextBlock跟写Run的写法差不多-->
+                        <TextBlock Text="设定值：" Foreground="{StaticResource AppTextMuted}" FontSize="12" Margin="0,5,0,0"/>
+                        <TextBlock Text="{Binding SettingTemp}" Foreground="{StaticResource AppTextMuted}" FontSize="12" Margin="0,5,0,0"/>
+                        
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <!--Card3:运行时间-->
+            <Border Grid.Column="2" Style="{StaticResource CardStyle}" Margin="0,0,10,0">
+                <StackPanel>
+                    <TextBlock Text="运行时间（H）" Foreground="{StaticResource AppTextMuted}" FontSize="14" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding RunningTime}" FontWeight="Bold" Foreground="{StaticResource AppAccentColor}" FontSize="32" Margin="0,0,0,10" FontFamily="{StaticResource FontMono}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="设备状态：" Foreground="{StaticResource AppTextMuted}" FontSize="12"/>
+                        <TextBlock Text="{Binding DeviceStatus}" Foreground="{StaticResource AppSuccess}" FontSize="12"/>
+
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--Card4:节拍-->
+            <Border Grid.Column="3" Style="{StaticResource CardStyle}" Margin="0,0,10,0">
+                <StackPanel>
+                    <TextBlock Text="当前节拍" Foreground="{StaticResource AppTextMuted}" FontSize="14" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding CurrentCycleTime}" Foreground="{StaticResource AppAccentColor}" FontSize="32" Margin="0,0,0,10" FontWeight="Bold" FontFamily="{StaticResource FontMono}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="标准：" Foreground="{StaticResource AppTextMuted}" FontSize="12" Margin="0,5,0,0"/>
+                        <TextBlock Text="{Binding StandardCycleTime}" Foreground="{StaticResource AppTextMuted}" FontSize="12" Margin="0,5,0,0"/>
+
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="300"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!--灌装工位实施状态-->
+            <Border Grid.Column="0" Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,10,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/> 
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,15">
+                        <TextBlock Text="灌装工位实时状态" Foreground="{StaticResource AppTextMuted}" FontSize="14" HorizontalAlignment="Left"/>
+                        <!--ContentControl 就是一个「空的容器控件」-->
+                        <ContentControl HorizontalAlignment="Right">
+                            <!--ContentControl.Template定义这个空容器自己的可视化结构-->
+                            <ContentControl.Template>
+                                <ControlTemplate TargetType="ContentControl">
+                                    <!--<Ellipse>：画一个椭圆（这里宽高都是 10px，实际是个小圆圈）；-->
+                                    <!--Fill="{StaticResource AppTextMuted}"：给小圆圈填充“AppTextMuted”这个预设颜色；-->
+                                        <StackPanel Orientation="Horizontal" x:Name="Container">
+                                        <Ellipse x:Name="ValueEllipse" Width="10" Height="10" Fill="{StaticResource AppTextMuted}" Margin="0,0,5,0"/>
+                                        <TextBlock x:Name="ValueText" Text="阀门关闭" Foreground="{StaticResource AppTextMuted}" FontSize="12"/>
+                                    </StackPanel>
+                                    <!--ControlTemplate.Triggers告诉程序 “盯着这些条件，满足了就执行对应的操作”，是所有动态逻辑的 “入口”。-->                                
+                                    <ControlTemplate.Triggers>
+                                        <!--DataTrigger Binding="{Binding ValueOpen}" Value="True"专门监听绑定的 ValueOpen 这个值，
+                                            只有当它变成 True（阀门打开）时，才执行下面所有操作；
+                                            如果是 False，啥都不做（保持默认的灰色 “阀门关闭”）。-->
+                                        <!--Setter的那三行就是 “满足条件后，改 3 个样式”-->
+                                        <DataTrigger Binding="{Binding ValueOpen}" Value="True">
+                                            <Setter TargetName="ValueEllipse" Property="Fill" Value="{StaticResource AppSuccess}"/>
+                                            <Setter TargetName="ValueText" Property="Foreground" Value="{StaticResource AppSuccess}"/>
+                                            <Setter TargetName="ValueText" Property="Text" Value="阀门打开"/>
+                                            <!--<DataTrigger.EnterActions>—— “加动画的指令”-->
+                                                <DataTrigger.EnterActions>
+                                                <!-- 启动一个动画 -->
+                                                <BeginStoryboard x:Name="Pulse">
+                                                    <!-- 动画规则：永远循环，并且来回播放（AutoReverse="True"） -->
+                                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                        <!-- 具体动画：给ValueEllipse小圆圈加透明度动画，1秒内从1（不透明）变到0.35（半透明），然后再变回来 -->
+                                                        <DoubleAnimation Storyboard.TargetName="ValueEllipse" Storyboard.TargetProperty="Opacity" From="1.0" To="0.35" Duration="0:0:1"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>    
+                                            </DataTrigger.EnterActions>
+                                        </DataTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ContentControl.Template>
+                        </ContentControl>
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                            <Border Width="150" Background="#333" BorderBrush="#555" BorderThickness="2" Height="200">
+                                <!--Grid 是网格布局，想分 “行 + 列” 复杂布局 → 用 Grid。-->
+                                <Grid>
+                                    <!--<Rectangle>表示WPF 基础形状控件，用于渲染矩形（这里模拟 “液体柱”）-->
+                                    <!--液体高度跟着绑定的数值变 —— 数值越大，矩形越高，看起来液体越多-->
+                                    <Rectangle x:Name="LiquidLevel" VerticalAlignment="Bottom" Opacity="0.8" Height="{Binding LiquidLevel}">
+                                        <!--<Rectangle.Fill>表示定义 Rectangle 的填充内容（颜色 / 渐变 / 图片等）-->
+                                            <Rectangle.Fill>
+                                            <!--<LinearGradientBrush>表示线性渐变画刷，用于创建从一个颜色平滑过渡到另一个颜色的填充效果-->
+                                            <!--StartPoint="0,1"	渐变起始点（坐标：X=0，Y=1 → 矩形底部）	渐变从矩形的 “底部” 开始-->
+                                            <!--EndPoint="0,0"	渐变结束点（坐标：X=0，Y=0 → 矩形顶部）	渐变到矩形的 “顶部” 结束-->
+                                            <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                                <!-- 渐变起始点（矩形底部）：深蓝色 -->
+                                                <GradientStop Color="#007ACC" Offset="0"/>
+                                                <!-- 渐变结束点（矩形顶部）：亮蓝色 -->
+                                                <GradientStop Color="#00AAFF" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                    <TextBlock Text="原料桶" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                            <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0">
+                                <Run Text="液位" Foreground="{StaticResource AppTextMuted}"/>
+                                <Run Text="{Binding LiquidLevel}" Foreground="White"/>
+                                <Run Text="%" Foreground="{StaticResource AppTextMuted}"/>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <Border Grid.Column="1" BorderBrush="#444" BorderThickness="1">
+                            <Grid>
+                                <!--传送带-->
+                                <Rectangle Height="10" VerticalAlignment="Bottom" Margin="0,0,0,20" Fill="#555"/>
+                                <Border Width="40" Height="80" Background="{StaticResource AppAccentColor}" VerticalAlignment="Bottom" Margin="0,0,0,30">
+                                    <TextBlock Text="Bottle" Foreground="White" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <!--阀门标签-->
+                                <TextBlock Text="[ 灌装阀门 ]" Foreground="#AAA" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,20,0,0"/>
+                                <!--Visibility —— “控件显隐开关”
+                                Visibility="Visible"：显示（能看到这个竖条）；
+                                Visibility="Collapsed"：隐藏（完全消失，不占任何空间）；
+                                Visibility="Hidden"：隐藏但占空间（用得少）。
+                                -->
+                                <!--这里要写转换器的原因是ValueOpen 是「布尔值（True/False）」，Visibility 需要的是「Visible/Collapsed」，类型不匹配，没法直接用；-->
+                                <!--转换器的作用：把 “True” 转换成 “Visible”，把 “False” 转换成 “Collapsed”（这是 WPF 内置转换器的默认规则）。-->
+                                <Rectangle Width="4" Height="50" Fill="Cyan" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,50,0,0" Visibility="{Binding ValueOpen,Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="最新报警" Foreground="{StaticResource AppTextMuted}" FontSize="14" Margin="0,0,0,15"/>
+                    <!--<ScrollViewer>—— “滚动容器”-->
+                    <!--VerticalScrollBarVisibility="Auto" —— “滚动条显示规则”-->
+                    <!--作用：控制垂直滚动条（上下滑的那条杠）什么时候显示，Auto 是最常用的规则：-->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <!--<ItemsControl>基础列表控件，绑定数据源（ItemsSource），批量渲染列表项，
+                            没有东西就啥都不渲染，是空的，有东西才给它渲染到界面上-->
+                            <ItemsControl ItemsSource="{Binding RecentAlarms}">
+                            <!--重点！由于绑定的是 RecentAlarms 集合里的每一个 AlarmUiModel 对象，所以不需要在DashBoardViewModel再进行定义-->
+                            <!--定义列表中「单个列表项」的可视化模板（告诉程序每个列表项长什么样）-->
+                            <ItemsControl.ItemTemplate>
+                                <!--具体的 “列表项模板内容”，描述单个列表项的 UI 结构（如文本、样式、布局）-->
+                                <DataTemplate>
+                                    <Border BorderBrush="#333" BorderThickness="0,0,0,1" Padding="5">
+                                        <TextBlock FontSize="12">
+                                            <Run Text="[" Foreground="White"/>
+                                            <Run Text="{Binding TimeStr}" Foreground="White"/>
+                                            <Run Text="]" Foreground="White"/>
+                                            <Run Text="{Binding Title}" Foreground="{StaticResource AppDanger}">
+                                                
+                                            </Run>
+                                        </TextBlock>
+                                        
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!--Grid.ColumnSpan="2" = 控件跨越 2 列显示，占满这 2 列的宽度；-->
+            <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Style="{StaticResource CardStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="50"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="温度趋势曲线（最近1小时）" Foreground="{StaticResource AppTextMuted}" FontSize="14" Margin="0,0,0,15"/>
+                    <Border Grid.Row="1" x:Name="ChartContainer" Background="#111" BorderBrush="#333" BorderThickness="1" MinHeight="150">
+                        <!--LegendLocation="None"	隐藏图表图例（图例是说明每条线代表什么的文字）-->
+                        <!--DisableAnimations="False"	开启图表动画（数据更新时曲线有动态过渡效果）-->
+                        <lvc:CartesianChart Series="{Binding TempLiveCharts}" LegendLocation="None" Background="Transparent" DisableAnimations="False" Margin="8">
+                            <!--显示 X 轴（比如时间轴），但去掉轴上的 “小竖线”，只留轴线 / 标签，更简洁。-->
+                            <lvc:CartesianChart.AxisX>
+                                <lvc:Axis IsEnabled="True">
+                                    <lvc:Axis.Separator>
+                                        <lvc:Separator IsEnabled="False"/>
+                                    </lvc:Axis.Separator>
+                                </lvc:Axis>
+                            </lvc:CartesianChart.AxisX>
+
+                            <!--配置 Y 轴（纵轴，温度值）：限定数值范围 0~150，显示数值标签，隐藏分隔线。-->
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis MinValue="0" MaxValue="150" ShowLabels="True">
+                                    <lvc:Axis.Separator>
+                                        <lvc:Separator IsEnabled="False"/>
+                                    </lvc:Axis.Separator>
+                                </lvc:Axis>
+                            </lvc:CartesianChart.AxisY>
+                        </lvc:CartesianChart>
+                    </Border>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
+                        <Button Content="🚀 启动生产" Command="{Binding StartProductionCommand}" Margin="0,0,10,0" Width="120"/>
+                        <Button Content="⏸️ 停止" Command="{Binding StopProductionCommand}" Background="{StaticResource AppWarning}" Margin="0,0,10,0" Width="120"/>
+                        <Button Content="🔄 复位" Command="{Binding ResetProductionCommand}" Style="{StaticResource OutLineButton}" Margin="0,0,10,0" Width="120"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

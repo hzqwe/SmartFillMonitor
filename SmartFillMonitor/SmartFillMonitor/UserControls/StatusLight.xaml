@@ -1,0 +1,146 @@
+﻿<UserControl x:Class="SmartFillMonitor.UserControls.StatusLight"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SmartFillMonitor.UserControls"
+             xmlns:cv="clr-namespace:SmartFillMonitor.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Width="40" Height="120">
+
+    <UserControl.Resources>
+        <cv:LightStateToBrushConverter x:Key="LightStateToBrushConverter"/>
+    </UserControl.Resources>
+        
+
+        <Grid Background="Transparent">
+        <Border CornerRadius="10" Background="#222" BorderBrush="#111" BorderThickness="2" Width="36" Height="110" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect ShadowDepth="3" BlurRadius="8" Opacity="0.3"/>
+            </Border.Effect>
+        </Border>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <!--绿灯-->
+            <Grid Width="25" Height="25" Margin="0,4">
+                <!-- 第一层Ellipse：绿灯的“暗部/阴影层”，营造灯体的立体感 -->
+                <Ellipse>
+                    <Ellipse.Fill>
+                        <!-- 径向渐变画笔：从中心到边缘的透明渐变，模拟灯体的暗部阴影 -->
+                        <RadialGradientBrush>
+                            <!-- 渐变起始点（中心）：完全透明（#00000000），Offset=0表示中心位置 -->
+                            <GradientStop Color="#00000000" Offset="0"/>
+                            <!-- 渐变结束点（边缘）：半透明黑色（#22000000），Offset=1表示边缘位置 -->
+                            <GradientStop Color="#22000000" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                    <!-- 裁剪为正圆形：确保Ellipse即使被拉伸也保持圆形，Center和Radius对应Grid的中心/尺寸 -->
+                    <Ellipse.Clip>
+                        <EllipseGeometry Center="12.5,12.5" RadiusX="12.5" RadiusY="12.5"/>
+                    </Ellipse.Clip>
+                </Ellipse>
+
+                <!-- 第二层Ellipse：绿灯的主体层（核心视觉），带边框和渐变填充 -->
+                <!-- Stroke="#111"  灯体边框：深灰色（#111），模拟金属边框 -->
+                <Ellipse x:Name="GreenEllipse" Stroke="#111" StrokeThickness="1.5">
+                    <Ellipse.Fill>
+                        <!-- 线性渐变画笔：从左上到右下的渐变，模拟灯光的光泽感 -->
+                        <LinearGradientBrush StartPoint="0.2,0" EndPoint="0.8,1">
+                            <!-- 渐变起始点：白色（模拟灯的高光），Offset=0表示左上位置 -->
+                            <GradientStop Color="White" Offset="0"/>
+                            <!-- 渐变中间点：核心绑定，根据State状态返回绿色/灰色 -->
+                            <GradientStop Color="{Binding State,RelativeSource={RelativeSource AncestorType=UserControl},Converter={StaticResource LightStateToBrushConverter},ConverterParameter=Green}" Offset="0.4"/>
+                            <!-- 渐变结束点：半透明黑色（#88000000），模拟灯的暗部，Offset=1表示右下位置 -->
+                            <GradientStop Color="#88000000" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Ellipse.Fill>
+                    <Ellipse.Effect>
+                        <!-- 高斯模糊特效：Radius=2表示模糊半径，让灯体边缘更柔和，模拟灯光的光晕 -->
+                        <BlurEffect Radius="2" KernelType="Gaussian"/>
+                    </Ellipse.Effect>
+                </Ellipse>
+                <Ellipse Width="8" Height="9" Margin="4,3" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <!-- 高光中心：浅白色半透明（#AAFFFFFF），Offset=0 -->
+                            <GradientStop Color="#AAFFFFFF" Offset="0"/>
+                            <!-- 高光边缘：半透明黑色，Offset=1，过渡自然 -->
+                            <GradientStop Color="#22000000" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>   
+            </Grid>
+
+            <!--黄灯-->
+            <Grid Width="25" Height="25" Margin="0,4">
+                <Ellipse>
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#00000000" Offset="0"/>
+                            <GradientStop Color="#22000000" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                    <Ellipse.Clip>
+                        <EllipseGeometry Center="12.5,12.5" RadiusX="12.5" RadiusY="12.5"/>
+                    </Ellipse.Clip>
+                </Ellipse>
+
+                <Ellipse x:Name="YellowEllipse" Stroke="#111" StrokeThickness="1.5">
+                    <Ellipse.Fill>
+                        <LinearGradientBrush StartPoint="0.2,0" EndPoint="0.8,1">
+                            <GradientStop Color="White" Offset="0"/>
+                            <GradientStop Color="{Binding State,RelativeSource={RelativeSource AncestorType=UserControl},Converter={StaticResource LightStateToBrushConverter},ConverterParameter=Yellow}" Offset="0.4"/>
+                            <GradientStop Color="#88000000" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Ellipse.Fill>
+                    <Ellipse.Effect>
+                        <BlurEffect Radius="2" KernelType="Gaussian"/>
+                    </Ellipse.Effect>
+                </Ellipse>
+                <Ellipse Width="8" Height="9" Margin="4,3" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#AAFFFFFF" Offset="0"/>
+                            <GradientStop Color="#22000000" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+            </Grid>
+
+            <!--红灯-->
+            <Grid Width="25" Height="25" Margin="0,4">
+                <Ellipse>
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#00000000" Offset="0"/>
+                            <GradientStop Color="#22000000" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                    <Ellipse.Clip>
+                        <EllipseGeometry Center="12.5,12.5" RadiusX="12.5" RadiusY="12.5"/>
+                    </Ellipse.Clip>
+                </Ellipse>
+
+                <Ellipse x:Name="RedEllipse" Stroke="#111" StrokeThickness="1.5">
+                    <Ellipse.Fill>
+                        <LinearGradientBrush StartPoint="0.2,0" EndPoint="0.8,1">
+                            <GradientStop Color="White" Offset="0"/>
+                            <GradientStop Color="{Binding State,RelativeSource={RelativeSource AncestorType=UserControl},Converter={StaticResource LightStateToBrushConverter},ConverterParameter=Red}" Offset="0.4"/>
+                            <GradientStop Color="#88000000" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Ellipse.Fill>
+                    <Ellipse.Effect>
+                        <BlurEffect Radius="2" KernelType="Gaussian"/>
+                    </Ellipse.Effect>
+                </Ellipse>
+                <Ellipse Width="8" Height="9" Margin="4,3" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#AAFFFFFF" Offset="0"/>
+                            <GradientStop Color="#22000000" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>
