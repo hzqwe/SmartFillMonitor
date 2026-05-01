@@ -76,10 +76,8 @@
 ---
 
 ## 📹 项目演示视频
-<video width="800" controls>
-  <source src="https://github.com/hzqwe/SmartFillMonitor/raw/main/demo.mp4" type="video/mp4">
-  [演示视频](https://github.com/hzqwe/SmartFillMonitor/raw/main/demo.mp4)
-</video>
+点击下方链接观看演示视频：
+[演示视频](https://github.com/hzqwe/SmartFillMonitor/raw/main/demo.mp4)
 
 ## 如何运行
 
